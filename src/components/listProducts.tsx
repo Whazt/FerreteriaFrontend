@@ -9,6 +9,7 @@ export interface Product {
     precio: string;
     existencias: number;
     categoriaId: number;
+    costo: string;
     imagenUrl: string;
     existenciaMax: number;
     existenciaMin: number;
