@@ -7,7 +7,7 @@ import { AdminPanel } from './pages/adminPanel';
 
 function App() {
   const location = useLocation();
-  const hideNavbar = location.pathname === "/Admin-Panel";
+  const hideNavbar = location.pathname.startsWith("/Admin-Panel");
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -17,7 +17,7 @@ function App() {
           <Route path="/" element={<Inicio />} />
           <Route path="/Nosotros" element={<Nosotros />} />
           <Route path="/Categorias" element={<Products />} />
-          <Route path="/Admin-Panel" element={<AdminPanel />} />
+          <Route path="/Admin-Panel/*" element={<AdminPanel />} />
         </Routes>
       </div>
     </div>
