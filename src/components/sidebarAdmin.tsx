@@ -10,40 +10,95 @@ const SidebarAdmin = () => {
             <img src="/salomonlogo.png" alt="Salomon Logo" className="p-2 mt-4 w-full md:w-auto" />
             </div>
             <nav className="flex flex-col mt-4">
-            <NavLink
-                to="/Admin-Panel"
-                className={({ isActive }) =>
-                isActive
-                    ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
-                    : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
-                }
-                end
-            >
-                <ProductIcon />
-                <span className="hidden md:block">Productos</span>
-            </NavLink>
-            <NavLink
-                to="/Admin-Panel/Usuarios"
-                className={({ isActive }) =>
-                isActive
-                    ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
-                    : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
-                }
-            >
-                <UsersGestIcon />
-                <span className="hidden md:block">Usuarios</span>
-            </NavLink>
-            <NavLink
-                to="/Admin-Panel/Ventas"
-                className={({ isActive }) =>
-                isActive
-                    ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
-                    : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
-                }
-            >
-                <VentasIcon />
-                <span className="hidden md:block">Ventas</span>
-            </NavLink>
+                <NavLink
+                    to="/Admin-Panel"
+                    className={({ isActive }) =>
+                    isActive
+                        ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                        : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                    }
+                    end
+                >
+                    <ProductIcon />
+                    <span className="hidden md:block">Productos</span>
+                </NavLink>
+                <NavLink
+                    to="/Admin-Panel/Usuarios"
+                    className={({ isActive }) =>
+                    isActive
+                        ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                        : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                    }
+                >
+                    <UsersGestIcon />
+                    <span className="hidden md:block">Usuarios</span>
+                </NavLink>
+                {/* <NavLink
+                    to="/Admin-Panel/Roles"
+                    className={({ isActive }) =>
+                    isActive
+                        ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                        : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                    }
+                >
+                    <VentasIcon />
+                    <span className="hidden md:block">Roles</span>
+                </NavLink> */}
+                <NavLink
+                    to="/Admin-Panel/TipoAjuste"
+                    className={({ isActive }) =>
+                    isActive
+                        ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                        : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                    }
+                >
+                    <VentasIcon />
+                    <span className="hidden md:block">TipoAjuste</span>
+                </NavLink>
+                <NavLink
+                    to="/Admin-Panel/Departamentos"
+                    className={({ isActive }) =>
+                    isActive
+                        ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                        : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                    }
+                >
+                    <VentasIcon />
+                    <span className="hidden md:block">Departamentos</span>
+                </NavLink>
+                <NavLink
+                    to="/Admin-Panel/Municipios"
+                    className={({ isActive }) =>
+                    isActive
+                        ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                        : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                    }
+                >
+                    <VentasIcon />
+                    <span className="hidden md:block">Municipios</span>
+                </NavLink>
+                <NavLink
+                    to="/Admin-Panel/Clientes"
+                    className={({ isActive }) =>
+                    isActive
+                        ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                        : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                    }
+                >
+                    <VentasIcon />
+                    <span className="hidden md:block">Clientes</span>
+                </NavLink>
+                <NavLink
+                    to="/Admin-Panel/Proveedores"
+                    className={({ isActive }) =>
+                    isActive
+                        ? "m-1 py-4 px-6 bg-orange-400 text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                        : "m-1 py-4 px-6 hover:bg-orange-500 hover:text-white rounded-lg flex gap-2 justify-center md:justify-start"
+                    }
+                >
+                    <VentasIcon />
+                    <span className="hidden md:block">Proveedores</span>
+                </NavLink>
             </nav>
         </div>
         <div className="p-4">

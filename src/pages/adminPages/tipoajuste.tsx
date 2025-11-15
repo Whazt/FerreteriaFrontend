@@ -20,7 +20,7 @@ export default function AdminTipoAjuste() {
     async function fetchAjustes() {
         try {
         setLoading(true);
-        const res = await fetch("http://localhost:1234/tipo_ajuste");
+        const res = await fetch("http://localhost:1234/tipoajustes");
         const raw = await res.json();
         const data = Array.isArray(raw) ? raw : raw.data;
         setAjustes(data);
@@ -52,7 +52,7 @@ export default function AdminTipoAjuste() {
         if (!confirm) return;
 
         try {
-        const res = await fetch(`http://localhost:1234/tipo_ajuste/${ajuste.id}`, {
+        const res = await fetch(`http://localhost:1234/tipoajustes/${ajuste.id}`, {
             method: "DELETE",
         });
         if (!res.ok) throw new Error("Error al eliminar");
@@ -75,8 +75,8 @@ export default function AdminTipoAjuste() {
 
         try {
         const url = isEdit
-            ? `http://localhost:1234/tipo_ajuste/${editingAjuste.id}`
-            : "http://localhost:1234/tipo_ajuste";
+            ? `http://localhost:1234/tipoajustes/${editingAjuste.id}`
+            : "http://localhost:1234/tipoajustes";
 
         const res = await fetch(url, {
             method: isEdit ? "PUT" : "POST",

@@ -28,7 +28,7 @@ export default function AdminMunicipios() {
     async function fetchMunicipios() {
         try {
         setLoading(true);
-        const res = await fetch("http://localhost:1234/municipio");
+        const res = await fetch("http://localhost:1234/municipios");
         const raw = await res.json();
         const data = Array.isArray(raw) ? raw : raw.data;
         setMunicipios(data);
@@ -42,7 +42,7 @@ export default function AdminMunicipios() {
 
     async function fetchDepartamentos() {
         try {
-        const res = await fetch("http://localhost:1234/departamento");
+        const res = await fetch("http://localhost:1234/departamentos");
         const raw = await res.json();
         const data = Array.isArray(raw) ? raw : raw.data;
         setDepartamentos(data);
@@ -71,7 +71,7 @@ export default function AdminMunicipios() {
         if (!confirm) return;
 
         try {
-        const res = await fetch(`http://localhost:1234/municipio/${mun.id}`, {
+        const res = await fetch(`http://localhost:1234/municipios/${mun.id}`, {
             method: "DELETE",
         });
         if (!res.ok) throw new Error("Error al eliminar");
@@ -95,8 +95,8 @@ export default function AdminMunicipios() {
 
         try {
         const url = isEdit
-            ? `http://localhost:1234/municipio/${editingMunicipio.id}`
-            : "http://localhost:1234/municipio";
+            ? `http://localhost:1234/municipios/${editingMunicipio.id}`
+            : "http://localhost:1234/municipios";
 
         const res = await fetch(url, {
             method: isEdit ? "PUT" : "POST",

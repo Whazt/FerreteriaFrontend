@@ -20,7 +20,7 @@ export default function AdminDepartamentos() {
     async function fetchDepartamentos() {
         try {
         setLoading(true);
-        const res = await fetch("http://localhost:1234/departamento");
+        const res = await fetch("http://localhost:1234/departamentos");
         const raw = await res.json();
         const data = Array.isArray(raw) ? raw : raw.data;
         setDepartamentos(data);
@@ -52,7 +52,7 @@ export default function AdminDepartamentos() {
         if (!confirm) return;
 
         try {
-        const res = await fetch(`http://localhost:1234/departamento/${dep.id}`, {
+        const res = await fetch(`http://localhost:1234/departamentos/${dep.id}`, {
             method: "DELETE",
         });
         if (!res.ok) throw new Error("Error al eliminar");
@@ -75,8 +75,8 @@ export default function AdminDepartamentos() {
 
         try {
         const url = isEdit
-            ? `http://localhost:1234/departamento/${editingDepartamento.id}`
-            : "http://localhost:1234/departamento";
+            ? `http://localhost:1234/departamentos/${editingDepartamento.id}`
+            : "http://localhost:1234/departamentos";
 
         const res = await fetch(url, {
             method: isEdit ? "PUT" : "POST",
