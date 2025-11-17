@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { Navbar } from "./components/navbar";
 import { AdminPanel } from './pages/adminPanel';
 import { CatalogoPage } from './pages/catalogo';
