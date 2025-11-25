@@ -4,8 +4,25 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 export const productService = {
     // Obtener catálogo completo o paginado
-    async getCatalogo(page: number = 1, limit: number = 20): Promise<Product[]> {
-        const res = await fetch(`${API_URL}/productos?page=${page}&limit=${limit}`);
+    async getCatalogo(
+        page: number = 1,
+        limit: number = 20,
+        search?: string,
+        categoriaId?: string,
+        precioMin?: number,
+        precioMax?: number
+    ): Promise<Product[]> {
+        const query = new URLSearchParams();
+
+        query.append("page", String(page));
+        query.append("limit", String(limit));
+
+        if (search) query.append("search", search);
+        if (categoriaId) query.append("categoriaId", categoriaId);
+        if (precioMin !== undefined) query.append("precioMin", String(precioMin));
+        if (precioMax !== undefined) query.append("precioMax", String(precioMax));
+
+        const res = await fetch(`${API_URL}/productos?${query.toString()}`);
         if (!res.ok) throw new Error("Error al obtener catálogo de productos");
 
         const json = await res.json();
@@ -13,12 +30,13 @@ export const productService = {
             codProducto: p.codProducto,
             producto: p.producto,
             descripcion: p.descripcion,
-            precio: parseFloat(p.precio),   
+            precio: parseFloat(p.precio),
             existencias: p.existencias,
             imagenUrl: p.imagenUrl ?? null,
             categoria: p.categoria ?? null,
         }));
     },
+    
 
 
     // Obtener un producto por ID
