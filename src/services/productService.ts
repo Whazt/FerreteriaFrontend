@@ -1,4 +1,17 @@
 import type { Product } from "../types/product";
+type CatalogoMeta = {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNext: boolean;
+};
+
+type CatalogoResponse = {
+    data: Product[];
+    meta: CatalogoMeta;
+    mensaje?: string;
+};
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -11,22 +24,19 @@ export const productService = {
         categoriaId?: string,
         precioMin?: number,
         precioMax?: number
-    ): Promise<Product[]> {
+        ): Promise<CatalogoResponse> {
         const query = new URLSearchParams();
-
         query.append("page", String(page));
         query.append("limit", String(limit));
-
         if (search) query.append("search", search);
         if (categoriaId) query.append("categoriaId", categoriaId);
         if (precioMin !== undefined) query.append("precioMin", String(precioMin));
         if (precioMax !== undefined) query.append("precioMax", String(precioMax));
-
         const res = await fetch(`${API_URL}/productos?${query.toString()}`);
         if (!res.ok) throw new Error("Error al obtener catálogo de productos");
-
         const json = await res.json();
-        return (json.data ?? []).map((p: any) => ({
+        return {
+            data: (json.data ?? []).map((p: any) => ({
             codProducto: p.codProducto,
             producto: p.producto,
             descripcion: p.descripcion,
@@ -34,10 +44,11 @@ export const productService = {
             existencias: p.existencias,
             imagenUrl: p.imagenUrl ?? null,
             categoria: p.categoria ?? null,
-        }));
+            })),
+            meta: json.meta,
+            mensaje: json.mensaje,
+        };
     },
-    
-
 
     // Obtener un producto por ID
     async getById(id: string): Promise<Product> {

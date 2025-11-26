@@ -34,6 +34,9 @@ export function FiltersBar() {
         if (categoriaId) params.set("categoriaId", categoriaId);
         else params.delete("categoriaId");
 
+        // 🔹 Reiniciar siempre a la página 1 al aplicar filtros
+        params.set("page", "1");
+
         navigate(`/Catalogo?${params.toString()}`);
     };
 

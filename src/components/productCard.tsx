@@ -1,5 +1,6 @@
 import { AddToCartButton } from "./addToCartButton";
 import type { Product } from "../types/product";
+import { useNavigate } from "react-router-dom";
 
 interface ProductCardProps {
     producto: Product;
@@ -8,11 +9,11 @@ interface ProductCardProps {
 
 export function ProductCard({ producto, onAddToCart }: ProductCardProps) {
     const isOutOfStock = producto.existencias === 0;
-
+    const navigate = useNavigate();
     return (
-        <div className="flex flex-col overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all hover:shadow-md">
+        <div className="flex flex-col overflow-hidden rounded-lg border border-gray-300 bg-card shadow-sm transition-all hover:shadow-md">
         {/* Imagen del producto */}
-            <div className="relative h-60 w-full overflow-hidden bg-muted">
+            <div className="relative h-60 w-full overflow-hidden bg-muted cursor-pointer" onClick={() => navigate(`/producto/${producto.codProducto}`)}>
                 {producto.imagenUrl ? (
                 <img
                     src={producto.imagenUrl}
@@ -33,7 +34,7 @@ export function ProductCard({ producto, onAddToCart }: ProductCardProps) {
 
             {/* Contenido */}
             <div className="flex flex-1 flex-col p-4">
-                <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-foreground">
+                <h3 className="mt-1 line-clamp-2 text-sm font-semibold text-foreground cursor-pointer" onClick={() => navigate(`/producto/${producto.codProducto}`)}>
                 {producto.producto}
                 </h3>
 

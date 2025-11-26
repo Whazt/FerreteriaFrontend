@@ -4,6 +4,8 @@ import { AdminPanel } from './pages/adminPanel';
 import { CatalogoPage } from './pages/catalogo';
 import { useEffect } from 'react';
 import { useCartStore } from './store/useCartStore';
+import ProductoPage from './pages/productPage';
+import { Carrito } from './pages/carrito';
 
 function App() {
   const location = useLocation();
@@ -23,6 +25,8 @@ function App() {
           <Route path="/" element={<CatalogoPage />} />
           <Route path="/Catalogo" element={<CatalogoPage />} />
           <Route path="/Admin-Panel/*" element={<AdminPanel />} />
+          <Route path="/Producto/:id" element={<ProductoPage />} />
+          <Route path="/Carrito" element={<Carrito />} />
         </Routes>
       </div>
     </div>

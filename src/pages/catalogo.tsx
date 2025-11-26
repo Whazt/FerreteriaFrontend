@@ -1,17 +1,27 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { productService } from "../services/productService";
 import { ProductCard } from "../components/productCard";
-import { FiltersBar } from "../components/filtersBar"; // 🔹 importar el componente
+import { FiltersBar } from "../components/filtersBar";
 import type { Product } from "../types/product";
 import toast from "react-hot-toast";
 import { useCartStore } from "../store/useCartStore";
 
+type CatalogoMeta = {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNext: boolean;
+};
+
 export function CatalogoPage({ token }: { token?: string }) {
     const [productos, setProductos] = useState<Product[]>([]);
+    const [meta, setMeta] = useState<CatalogoMeta | null>(null);
     const [loading, setLoading] = useState(true);
     const { items, addItem } = useCartStore();
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const page = Number(searchParams.get("page")) || 1;
@@ -28,10 +38,14 @@ export function CatalogoPage({ token }: { token?: string }) {
         setLoading(true);
         productService
             .getCatalogo(page, limit, search, categoriaId, precioMin, precioMax)
-            .then(setProductos)
+            .then((res) => {
+                setProductos(res.data);
+                setMeta(res.meta);
+            })
             .catch((err) => {
                 console.error("Error al cargar catálogo:", err);
                 setProductos([]);
+                setMeta(null);
             })
             .finally(() => setLoading(false));
     }, [searchParams]);
@@ -69,6 +83,12 @@ export function CatalogoPage({ token }: { token?: string }) {
         toast.success(`"${producto.producto}" agregado al carrito`);
     };
 
+    const goToPage = (page: number) => {
+        const params = new URLSearchParams(searchParams);
+        params.set("page", String(page));
+        navigate(`/Catalogo?${params.toString()}`);
+    };
+
     if (loading) return <p>Cargando catálogo...</p>;
 
     return (
@@ -86,6 +106,29 @@ export function CatalogoPage({ token }: { token?: string }) {
                     />
                 ))}
             </div>
+
+            {/* 🔹 Paginación */}
+            {meta && meta.totalPages > 1 && (
+                <div className="flex justify-center items-center space-x-2 mt-6">
+                    <button
+                        disabled={meta.page === 1}
+                        onClick={() => goToPage(meta.page - 1)}
+                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                    >
+                        Anterior
+                    </button>
+                    <span className="px-3 py-1">
+                        Página {meta.page} de {meta.totalPages}
+                    </span>
+                    <button
+                        disabled={!meta.hasNext}
+                        onClick={() => goToPage(meta.page + 1)}
+                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+                    >
+                        Siguiente
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

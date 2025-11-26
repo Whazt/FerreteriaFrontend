@@ -1,3 +1,4 @@
+import { NavLink } from "react-router-dom";
 import { useCartStore } from "../store/useCartStore";
 import { CartItemCard } from "./cartItemCard";
 
@@ -55,9 +56,9 @@ export function CartSidebar({ visible, onClose, token }: Props) {
                 >
                     Limpiar
                 </button>
-                <button className="flex-1 bg-orange-500 text-white px-2 py-2 rounded hover:bg-orange-600">
+                <NavLink to="/Carrito" className="flex-1 bg-orange-500 text-white px-2 py-2 rounded hover:bg-orange-600" onClick={onClose}>
                     Ver Carrito
-                </button>
+                </NavLink>
                 </div>
             </div>
         </div>
