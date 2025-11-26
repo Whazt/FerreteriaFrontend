@@ -41,7 +41,7 @@ export function ProductCard({ producto, onAddToCart }: ProductCardProps) {
                 <div className="mt-auto space-y-2 pt-3">
                 <div className="flex items-baseline gap-2">
                     <span className="text-lg font-bold text-primary">
-                    ${producto.precio.toFixed(2)}
+                    C${producto.precio.toFixed(2)}
                     </span>
                 </div>
 

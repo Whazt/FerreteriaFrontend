@@ -4,6 +4,7 @@ import { SearchBar } from "./searchbar";
 import { NavLink } from "react-router-dom";
 import { Cart } from "./cart";
 import React from "react";
+import AuthButton from "./authButton";
 
 export const Navbar: React.FC = () => {
 
@@ -20,13 +21,13 @@ export const Navbar: React.FC = () => {
             <div className="col-span-1 md:col-span-5 hidden md:block">
                 <SearchBar />
             </div>
-            {/* <div className="col-span-1 md:col-span-1 text-center md:text-left">
-                <Login />
-            </div> */}
+            <div className="col-span-1 md:col-span-1 flex justify-center text-center md:text-left">
+                <AuthButton />
+            </div>
             <div className="col-span-1 md:col-span-1 text-center md:text-left">
                 <Cart />
             </div> 
-            <div className="col-span-8 md:col-span-8 flex flex-wrap gap-2 items-center justify-center bg-orange-400 p-2 mt-2 md:mt-0 w-full">
+            <div className="col-span-8  md:col-span-8 flex flex-wrap gap-2 items-center justify-center bg-orange-400 p-2 mt-2 md:mt-0 w-full">
                 <NavLink
                     to="/"
                     className="p-2 text-white rounded-md hover:bg-orange-500"

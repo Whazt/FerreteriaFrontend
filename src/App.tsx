@@ -6,17 +6,24 @@ import { useEffect } from 'react';
 import { useCartStore } from './store/useCartStore';
 import ProductoPage from './pages/productPage';
 import { Carrito } from './pages/carrito';
+import { useAuthStore } from './store/useAuthStore';
 
 function App() {
   const location = useLocation();
   const hideNavbar = location.pathname.startsWith("/Admin-Panel");
   const { loadCart } = useCartStore();
+  const { accessToken, setUserFromToken } = useAuthStore();
 
   useEffect(() => {
     // hidrata carrito desde backend o localStorage
     loadCart();
   }, [loadCart]);
 
+  useEffect(() => {
+    if (accessToken) {
+      setUserFromToken(accessToken);
+    }
+  }, [accessToken, setUserFromToken]);
   return (
     <div className="min-h-screen flex flex-col">
       {!hideNavbar && <Navbar />}
