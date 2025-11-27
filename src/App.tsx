@@ -13,6 +13,7 @@ import { NosotrosPage } from './pages/nosotros';
 function App() {
   const location = useLocation();
   const hideNavbar = location.pathname.startsWith("/Admin-Panel");
+  const hideFooter = location.pathname.startsWith("/Admin-Panel");
   const { loadCart } = useCartStore();
   const { accessToken, setUserFromToken } = useAuthStore();
 
@@ -40,6 +41,7 @@ function App() {
           <Route path="/Carrito" element={<Carrito />} />
         </Routes>
       </div>
+      {/* {!hideFooter && <Footer/>} */}
     </div>
   );
 }

@@ -69,7 +69,7 @@ export default function LoginModal({
                 <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3 top-3 text-gray-600 text-lg"
+                className="absolute right-3 top-4 text-gray-600 text-lg"
                 >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
