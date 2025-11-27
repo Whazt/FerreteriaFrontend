@@ -8,6 +8,7 @@ import ProductoPage from './pages/productPage';
 import { Carrito } from './pages/carrito';
 import { useAuthStore } from './store/useAuthStore';
 import AppCartSync from './components/appCartSync';
+import { NosotrosPage } from './pages/nosotros';
 
 function App() {
   const location = useLocation();
@@ -33,6 +34,7 @@ function App() {
         <Routes>
           <Route path="/" element={<CatalogoPage />} />
           <Route path="/Catalogo" element={<CatalogoPage />} />
+          <Route path="/Nosotros" element={<NosotrosPage />} />
           <Route path="/Admin-Panel/*" element={<AdminPanel />} />
           <Route path="/Producto/:id" element={<ProductoPage />} />
           <Route path="/Carrito" element={<Carrito />} />
