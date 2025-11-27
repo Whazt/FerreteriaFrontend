@@ -7,6 +7,7 @@ import { useCartStore } from './store/useCartStore';
 import ProductoPage from './pages/productPage';
 import { Carrito } from './pages/carrito';
 import { useAuthStore } from './store/useAuthStore';
+import AppCartSync from './components/appCartSync';
 
 function App() {
   const location = useLocation();
@@ -26,6 +27,7 @@ function App() {
   }, [accessToken, setUserFromToken]);
   return (
     <div className="min-h-screen flex flex-col">
+      <AppCartSync/>
       {!hideNavbar && <Navbar />}
       <div className="grow">
         <Routes>

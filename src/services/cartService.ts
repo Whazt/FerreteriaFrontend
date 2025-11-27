@@ -14,12 +14,44 @@ const getSessionId = (): string => {
 export const cartService = {
     // 🔒 Métodos con login (backend)
 
+    // async getCarrito(token: string): Promise<CartItem[]> {
+    //     const res = await fetch(`${API_URL}/carrito`, {
+    //     headers: { Authorization: `Bearer ${token}` },
+    //     });
+    //     if (!res.ok) throw new Error("Error al obtener carrito");
+    //     return await res.json();
+    // },
+
     async getCarrito(token: string): Promise<CartItem[]> {
         const res = await fetch(`${API_URL}/carrito`, {
-        headers: { Authorization: `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` },
         });
         if (!res.ok) throw new Error("Error al obtener carrito");
-        return await res.json();
+        const data = await res.json();
+
+        return data.map((item: any) => ({
+            usuarioId: item.usuarioId,
+            productoId: item.productoId,
+            cantidad: item.cantidad,
+            // 🔹 Normalizamos producto
+            producto: {
+            cod_producto: item.producto.codProducto,
+            nombre: item.producto.producto,
+            descripcion: item.producto.descripcion,
+            precio: Number(item.producto.precio),
+            existencias: item.producto.existencias,
+            categoriaId: item.producto.categoriaId,
+            costo: Number(item.producto.costo),
+            imagenUrl: item.producto.imagenUrl,
+            existenciaMax: item.producto.existenciaMax,
+            existenciaMin: item.producto.existenciaMin,
+            },
+            // 🔹 fallback para render rápido
+            precio: Number(item.producto.precio),
+            nombre: item.producto.producto,
+            existencias: item.producto.existencias,
+            imagenUrl: item.producto.imagenUrl,
+        }));
     },
 
     async agregarProducto(token: string, productoId: string, cantidad: number): Promise<CartItem> {
@@ -92,19 +124,21 @@ export const cartService = {
     },
 
     async sincronizarCarritoLocal(token: string): Promise<CartItem[]> {
-        const items = cartService.getCarritoLocal();
+        const productos = cartService.getCarritoLocal(); // 🔹 ahora se llama productos
         const res = await fetch(`${API_URL}/carrito/sincronizar`, {
-        method: "POST",
-        headers: {
+            method: "POST",
+            headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ items }),
+            },
+            body: JSON.stringify({ productos }), // 🔹 coincide con req.body.productos
         });
+
         if (!res.ok) throw new Error("Error al sincronizar carrito local");
-        const carrito = await res.json();
+
+        const { result } = await res.json(); // backend devuelve { mensaje, result }
         localStorage.removeItem("cartItems");
-        return carrito;
+        return result;
     },
 
     // 🟢 Métodos sin login (localStorage)

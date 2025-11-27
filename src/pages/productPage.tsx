@@ -6,7 +6,7 @@ import { ICartIcon } from "../components/icons";
 import type { Product } from "../types/product";
 import toast from "react-hot-toast";
 
-function ProductoPage({ token }: { token?: string }) {
+function ProductoPage() {
     const { id } = useParams<{ id: string }>();
     const [product, setProduct] = useState<Product | null>(null);
     const [quantity, setQuantity] = useState(1);
@@ -49,8 +49,7 @@ function ProductoPage({ token }: { token?: string }) {
             ? product.imagenUrl
             : `/${product.imagenUrl}`,
             existencias: product.existencias,
-        },
-        token
+        }
         );
 
         toast.success(`"${product.producto}" agregado al carrito`);

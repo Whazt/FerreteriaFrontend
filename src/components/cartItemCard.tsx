@@ -1,52 +1,55 @@
 import { useCartStore } from "../store/useCartStore";
-import {  TrashIcon } from "./icons";
+import { TrashIcon } from "./icons";
 
 interface CartItemCardProps {
     productoId: string;
-    token?: string;
 }
 
-export function CartItemCard({ productoId, token }: CartItemCardProps) {
+export function CartItemCard({ productoId }: CartItemCardProps) {
     const { items, incrementar, disminuir, removeItem } = useCartStore();
     const item = items.find((i) => i.productoId === productoId);
     if (!item) return null;
 
-    const precioUnit = item.producto ? item.producto.precio : (item.precio ?? 0);
+    // 🔹 Usamos siempre producto como fuente principal
+    const nombre = item.producto?.producto ?? item.nombre ?? "Producto";
+    const imagenUrl = item.producto?.imagenUrl ?? item.imagenUrl ?? "/placeholder.svg";
+    const precioUnit = Number(item.producto?.precio ?? item.precio ?? 0);
+    const existencias = Number(item.producto?.existencias ?? item.existencias ?? 0);
     const total = precioUnit * item.cantidad;
-    const existencias = item.producto ? item.producto.existencias : (item.existencias ?? 0);;
 
     const handleDecrement = () => {
         if (item.cantidad > 1) {
-        disminuir(productoId, token);
+        disminuir(productoId);
         }
     };
 
     const handleIncrement = () => {
         if (item.cantidad < existencias) {
-        incrementar(productoId, token);
+        incrementar(productoId);
         }
     };
 
     const handleRemove = () => {
-        removeItem(productoId, token);
+        removeItem(productoId);
     };
 
     return (
         <div className="overflow-hidden border border-gray-300 bg-white p-3 rounded-md">
         <div className="flex gap-3">
-            {/* Imagen  */}
+            {/* Imagen */}
             <div className="h-25 w-25 shrink-0 overflow-hidden rounded-md bg-gray-100">
-                <img
-                    src={item.imagenUrl || "/placeholder.svg"}
-                    alt={item.nombre}
-                    className="h-full w-full object-cover"
-                />
+            <img
+                src={imagenUrl}
+                alt={nombre}
+                className="h-full w-full object-cover"
+            />
             </div>
+
             {/* Info */}
             <div className="flex flex-1 flex-col justify-between">
             <div className="space-y-1">
                 <h3 className="line-clamp-2 text-md font-medium text-gray-800">
-                {item.nombre}
+                {nombre}
                 </h3>
                 <p className="text-xs text-gray-500">
                 C${precioUnit.toFixed(2)}
@@ -66,7 +69,7 @@ export function CartItemCard({ productoId, token }: CartItemCardProps) {
                     -
                 </button>
                 <button
-                    className=" flex h-6 w-6 text-center text-xl justify-center items-center p-0 text-green-500 hover:text-green-600 hover:bg-gray-200 rounded"
+                    className="flex h-6 w-6 text-center text-xl justify-center items-center p-0 text-green-500 hover:text-green-600 hover:bg-gray-200 rounded"
                     onClick={handleIncrement}
                 >
                     +
@@ -83,7 +86,7 @@ export function CartItemCard({ productoId, token }: CartItemCardProps) {
                     onClick={handleRemove}
                     title="Eliminar"
                 >
-                    <TrashIcon/>
+                    <TrashIcon />
                 </button>
                 </div>
             </div>

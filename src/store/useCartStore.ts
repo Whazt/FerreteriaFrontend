@@ -1,77 +1,95 @@
 import { create } from "zustand";
 import type { CartItem } from "../types/cart";
 import { cartService } from "../services/cartService";
+import { useAuthStore } from "./useAuthStore";
 
 interface CartState {
     items: CartItem[];
     sessionId: string;
-    loadCart: (token?: string) => Promise<void>;
-    addItem: (item: CartItem, token?: string) => Promise<void>;
-    incrementar: (productoId: string, token?: string) => Promise<void>;
-    disminuir: (productoId: string, token?: string) => Promise<void>;
-    removeItem: (productoId: string, token?: string) => Promise<void>;
-    clearCart: (token?: string) => Promise<void>;
+    loadCart: () => Promise<void>;
+    addItem: (item: CartItem) => Promise<void>;
+    incrementar: (productoId: string) => Promise<void>;
+    disminuir: (productoId: string) => Promise<void>;
+    removeItem: (productoId: string) => Promise<void>;
+    clearCart: () => Promise<void>;
     total: () => number;
-    sincronizar: (token: string) => Promise<void>;
+    sincronizar: () => Promise<void>;
 }
 
-export const useCartStore = create<CartState>((set, get) => ({
+// 🔹 Normaliza los datos del producto al nivel raíz
+function normalizeItem(item: CartItem): CartItem {
+    const p = item.producto;
+    return {
+        ...item,
+        precio: Number(p?.precio ?? item.precio ?? 0),
+        nombre: p?.producto ?? item.nombre,
+        imagenUrl: p?.imagenUrl ?? item.imagenUrl,
+        existencias: p?.existencias ?? item.existencias,
+    };
+    }
+
+    export const useCartStore = create<CartState>((set, get) => ({
     items: [],
     sessionId: cartService.getSessionId(),
 
+    getToken: () => useAuthStore.getState().accessToken,
+
     // Cargar carrito
-    loadCart: async (token) => {
-        if (token) {
-        const items = await cartService.getCarrito(token);
-        set({ items });
-        } else {
-        const items = cartService.getCarritoLocal();
-        set({ items });
-        }
+    loadCart: async () => {
+        const token = useAuthStore.getState().accessToken;
+        const items = token
+        ? await cartService.getCarrito(token)
+        : cartService.getCarritoLocal();
+        set({ items: items.map(normalizeItem) });
     },
 
     // Agregar producto
-    addItem: async (item, token) => {
+    addItem: async (item) => {
+        const token = useAuthStore.getState().accessToken;
         if (token) {
         const nuevo = await cartService.agregarProducto(token, item.productoId, item.cantidad);
         set((state) => {
-            const existe = state.items.find((i) => i.productoId === nuevo.productoId);
-            if (existe) {
+        const existe = state.items.find((i) => i.productoId === nuevo.productoId);
+        if (existe) {
+            const combinado = normalizeItem({
+            ...existe,
+            cantidad: existe.cantidad + item.cantidad,
+            producto: nuevo.producto,
+            });
             return {
-                items: state.items.map((i) =>
-                i.productoId === nuevo.productoId
-                    ? { ...i, cantidad: i.cantidad + item.cantidad }
-                    : i
-                ),
+            items: state.items.map((i) =>
+                i.productoId === nuevo.productoId ? combinado : i
+            ),
             };
-            }
-            return { items: [...state.items, nuevo] };
+        }
+        return { items: [...state.items, normalizeItem(nuevo)] };
         });
         } else {
         const updated = cartService.addProductoLocal(item);
-        set({ items: updated });
+        set({ items: updated.map(normalizeItem) });
         }
     },
 
     // Incrementar cantidad
-    incrementar: async (productoId, token) => {
+    incrementar: async (productoId) => {
+        const token = useAuthStore.getState().accessToken;
         if (token) {
         const actualizado = await cartService.incrementar(token, productoId);
+        const normalizado = normalizeItem(actualizado);
         set((state) => ({
             items: state.items.map((i) =>
-            i.productoId === actualizado.productoId
-                ? { ...i, cantidad: actualizado.cantidad }
-                : i
+            i.productoId === productoId ? { ...i, ...normalizado } : i
             ),
         }));
         } else {
         const updated = cartService.incrementarLocal(productoId);
-        set({ items: updated });
+        set({ items: updated.map(normalizeItem) });
         }
     },
 
     // Disminuir cantidad
-    disminuir: async (productoId, token) => {
+    disminuir: async (productoId) => {
+        const token = useAuthStore.getState().accessToken;
         if (token) {
         const res = await cartService.disminuir(token, productoId);
         if ("eliminado" in res) {
@@ -79,22 +97,22 @@ export const useCartStore = create<CartState>((set, get) => ({
             items: state.items.filter((i) => i.productoId !== productoId),
             }));
         } else {
+            const normalizado = normalizeItem(res);
             set((state) => ({
             items: state.items.map((i) =>
-                i.productoId === res.productoId
-                ? { ...i, cantidad: res.cantidad }
-                : i
+                i.productoId === productoId ? { ...i, ...normalizado } : i
             ),
             }));
         }
         } else {
         const updated = cartService.disminuirLocal(productoId);
-        set({ items: updated });
+        set({ items: updated.map(normalizeItem) });
         }
     },
 
     // Eliminar producto
-    removeItem: async (productoId, token) => {
+    removeItem: async (productoId) => {
+        const token = useAuthStore.getState().accessToken;
         if (token) {
         await cartService.eliminarProducto(token, productoId);
         set((state) => ({
@@ -102,33 +120,32 @@ export const useCartStore = create<CartState>((set, get) => ({
         }));
         } else {
         const updated = cartService.eliminarProductoLocal(productoId);
-        set({ items: updated });
+        set({ items: updated.map(normalizeItem) });
         }
     },
 
     // Limpiar carrito
-    clearCart: async (token) => {
+    clearCart: async () => {
+        const token = useAuthStore.getState().accessToken;
         if (token) {
         await cartService.limpiarCarrito(token);
         set({ items: [] });
         } else {
         const cleared = cartService.limpiarCarritoLocal();
-        set({ items: cleared });
+        set({ items: cleared.map(normalizeItem) });
         }
     },
 
     // Calcular total
     total: () =>
-        get().items.reduce((acc, i) => {
-        // si viene del backend → usa producto.precio
-        if (i.producto) return acc + i.producto.precio * i.cantidad;
-        // si es local → usa precio guardado
-        return acc + (i.precio ?? 0) * i.cantidad;
-        }, 0),
+        get().items.reduce((acc, i) => acc + (i.precio ?? 0) * i.cantidad, 0),
 
     // Migrar carrito local al backend al loguearse
-    sincronizar: async (token) => {
+    sincronizar: async () => {
+        const token = useAuthStore.getState().accessToken;
+        if (token) {
         const migrated = await cartService.sincronizarCarritoLocal(token);
-        set({ items: migrated });
+        set({ items: migrated.map(normalizeItem) });
+        }
     },
 }));

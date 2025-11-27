@@ -15,12 +15,11 @@ function CartItemCard({
     disminuir: (id: string) => void;
     removeItem: (id: string) => void;
     }) {
-    const precioUnit = item.producto
-        ? item.producto.precio
-        : Number(item.precio ?? 0);
-    const existencias = item.producto
-        ? item.producto.existencias
-        : Number(item.existencias ?? Infinity);
+    // 🔹 Usamos siempre producto como fuente principal
+    const nombre = item.producto?.producto ?? item.nombre ?? "Producto";
+    const imagenUrl = item.producto?.imagenUrl ?? item.imagenUrl ?? "/placeholder.svg";
+    const precioUnit = Number(item.producto?.precio ?? item.precio ?? 0);
+    const existencias = Number(item.producto?.existencias ?? item.existencias ?? Infinity);
     const total = precioUnit * item.cantidad;
 
     const formattedPrice = new Intl.NumberFormat("es-NI", {
@@ -37,13 +36,11 @@ function CartItemCard({
         <div className="flex flex-col md:flex-row items-center p-4 border-b border-gray-200">
         <img
             className="w-32 h-32 object-cover"
-            src={item.imagenUrl || "/placeholder.svg"}
-            alt={item.nombre ?? item.producto?.producto ?? "Producto"}
+            src={imagenUrl}
+            alt={nombre}
         />
         <div className="flex-1 ml-4">
-            <h2 className="text-xl font-bold">
-            {item.nombre ?? item.producto?.producto ?? "Producto"}
-            </h2>
+            <h2 className="text-xl font-bold">{nombre}</h2>
             <div className="flex items-center mt-2">
             <span className="text-lg">Cant.: </span>
             <div className="flex ml-2 items-center border border-gray-300 rounded">
@@ -75,7 +72,7 @@ function CartItemCard({
         </div>
         </div>
     );
-    }
+}
 
     export function Carrito() {
     const { items, incrementar, disminuir, removeItem, clearCart, total } =
