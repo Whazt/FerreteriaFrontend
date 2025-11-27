@@ -97,7 +97,7 @@ export function FiltersBar() {
 
             <button
                 type="submit"
-                className="p-2 bg-orange-400 text-white rounded-md hover:bg-orange-500 w-full sm:w-auto"
+                className="p-2 mt-6 bg-orange-400 text-white rounded-md hover:bg-orange-500 w-full sm:w-auto"
             >
                 Filtrar
             </button>
