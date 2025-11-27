@@ -9,6 +9,8 @@ import { Carrito } from './pages/carrito';
 import { useAuthStore } from './store/useAuthStore';
 import AppCartSync from './components/appCartSync';
 import { NosotrosPage } from './pages/nosotros';
+import  Footer  from "./components/footer";
+import Inicio from "./pages/inicio";
 
 function App() {
   const location = useLocation();
@@ -33,7 +35,7 @@ function App() {
       {!hideNavbar && <Navbar />}
       <div className="grow">
         <Routes>
-          <Route path="/" element={<CatalogoPage />} />
+          <Route path="/" element={<Inicio />} />
           <Route path="/Catalogo" element={<CatalogoPage />} />
           <Route path="/Nosotros" element={<NosotrosPage />} />
           <Route path="/Admin-Panel/*" element={<AdminPanel />} />
@@ -41,7 +43,7 @@ function App() {
           <Route path="/Carrito" element={<Carrito />} />
         </Routes>
       </div>
-      {/* {!hideFooter && <Footer/>} */}
+      {!hideFooter && <Footer/>}
     </div>
   );
 }
