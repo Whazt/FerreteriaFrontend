@@ -34,7 +34,7 @@ const MainCarousel = () => {
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
       >
         {banners.map((banner, index) => (
-          <div key={index} className="w-full flex-shrink-0">
+          <div key={index} className="w-full shrink-0">
             <img 
               src={banner} 
               alt={`Banner ${index + 1}`} 
@@ -45,7 +45,7 @@ const MainCarousel = () => {
       </div>
 
       {/* Indicadores (Puntos) en la parte inferior */}
-      <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+      <div className=" bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
         {banners.map((_, index) => (
           <button
             key={index}

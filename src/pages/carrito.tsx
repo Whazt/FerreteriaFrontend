@@ -3,19 +3,22 @@ import { useCartStore } from "../store/useCartStore";
 import { SmallTrashIcon } from "../components/icons";
 import { NavLink } from "react-router-dom";
 import type { CartItem } from "../types/cart";
+import { useAuthStore } from "../store/useAuthStore";
+import { CheckoutModal } from "../components/checkoutModal";
+import LoginModal from "../components/loginModal";
+import RegisterModal from "../components/registerModal";
 
 function CartItemCard({
     item,
     incrementar,
     disminuir,
     removeItem,
-    }: {
+}: {
     item: CartItem;
     incrementar: (id: string) => void;
     disminuir: (id: string) => void;
     removeItem: (id: string) => void;
-    }) {
-    // 🔹 Usamos siempre producto como fuente principal
+}) {
     const nombre = item.producto?.producto ?? item.nombre ?? "Producto";
     const imagenUrl = item.producto?.imagenUrl ?? item.imagenUrl ?? "/placeholder.svg";
     const precioUnit = Number(item.producto?.precio ?? item.precio ?? 0);
@@ -34,11 +37,7 @@ function CartItemCard({
 
     return (
         <div className="flex flex-col md:flex-row items-center p-4 border-b border-gray-200">
-        <img
-            className="w-32 h-32 object-cover"
-            src={imagenUrl}
-            alt={nombre}
-        />
+        <img className="w-32 h-32 object-cover" src={imagenUrl} alt={nombre} />
         <div className="flex-1 ml-4">
             <h2 className="text-xl font-bold">{nombre}</h2>
             <div className="flex items-center mt-2">
@@ -72,20 +71,24 @@ function CartItemCard({
         </div>
         </div>
     );
-}
+    }
 
     export function Carrito() {
-    const { items, incrementar, disminuir, removeItem, clearCart, total } =
-        useCartStore();
+    const { items, incrementar, disminuir, removeItem, clearCart, total } = useCartStore();
+    const { user, accessToken } = useAuthStore();
+    const isLoggedIn = !!accessToken && !!user;
+
     const [subtotal, setSubtotal] = useState(0);
     const [totalItems, setTotalItems] = useState(0);
     const [iva, setIva] = useState(0);
     const [grandTotal, setGrandTotal] = useState(0);
 
+    const [modal, setModal] = useState<"none" | "login" | "register" | "checkout">("none");
+
     useEffect(() => {
         const newSubtotal = total();
         const newTotalItems = items.reduce((acc, i) => acc + i.cantidad, 0);
-        const newIva = newSubtotal * 0.15; // 🔹 IVA del 15%
+        const newIva = newSubtotal * 0.15;
         const newGrandTotal = newSubtotal + newIva;
 
         setSubtotal(newSubtotal);
@@ -108,6 +111,14 @@ function CartItemCard({
         style: "currency",
         currency: "NIO",
     }).format(grandTotal);
+
+    const handleCheckoutClick = () => {
+        if (!isLoggedIn) {
+        setModal("login");
+        } else {
+        setModal("checkout");
+        }
+    };
 
     return (
         <div className="container mx-auto p-4 mt-16">
@@ -149,7 +160,7 @@ function CartItemCard({
             <div>
                 <button
                 className="block w-full bg-orange-400 hover:bg-orange-500 text-white py-2 mb-4 rounded text-center"
-                onClick={() => alert("Checkout pendiente")}
+                onClick={handleCheckoutClick}
                 >
                 Ir a Pagar
                 </button>
@@ -170,6 +181,29 @@ function CartItemCard({
             </div>
             </div>
         </div>
+
+        {/* Modales condicionales */}
+        {modal === "login" && (
+            <LoginModal
+            onClose={() => setModal("none")}
+            onRegister={() => setModal("register")}
+            />
+        )}
+        {modal === "register" && (
+            <RegisterModal
+            onClose={() => setModal("login")}
+            />
+        )}
+        {modal === "checkout" && user && (
+            <CheckoutModal 
+                user={{
+                    id: user.id,
+                    email: user.email,
+                    rolId: user.rol, // 🔹 mapeo explícito
+                }}
+                onClose={() => setModal("none")}
+            />
+        )}
         </div>
     );
 }
