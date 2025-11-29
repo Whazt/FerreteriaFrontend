@@ -5,7 +5,7 @@ const Footer = () => {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 border-t-8 border-gray-900 justify-items-center text-black p-4">
       
       <div className="col-span-1 flex flex-col items-center justify-center text-center">
-        <NavLink to="/Contact"><strong className="text-orange-500"> Contactenos </strong></NavLink>
+        <NavLink to="/Contacto"><strong className="text-orange-500"> Contactenos </strong></NavLink>
         
         <br />
         <div className="text-left">

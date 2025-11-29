@@ -10,6 +10,7 @@ import { useAuthStore } from './store/useAuthStore';
 import AppCartSync from './components/appCartSync';
 import { NosotrosPage } from './pages/nosotros';
 import Footer from "./components/footer";
+import { ContactoPage } from './pages/contacto';
 import Inicio from "./pages/inicio";
 import { ProtectedRoute } from './components/protectedRoutes';
 import { jwtDecode } from 'jwt-decode';
@@ -113,6 +114,7 @@ function App() {
           
           <Route path="/Producto/:id" element={<ProductoPage />} />
           <Route path="/Carrito" element={<Carrito />} />
+          <Route path="/Contacto" element={<ContactoPage/>} />
         </Routes>
       </div>
       {!hideFooter && <Footer/>}
