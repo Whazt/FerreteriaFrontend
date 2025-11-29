@@ -52,7 +52,7 @@ export const useAuthStore = create<AuthState>()(
                 const userState: UserState = {
                 id: decoded.id,
                 email: decoded.email,
-                rol: decoded.rol,
+                rolId: decoded.rol,
                 };
                 set({ user: userState });
             } catch (e) {

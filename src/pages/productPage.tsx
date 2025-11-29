@@ -45,9 +45,7 @@ function ProductoPage() {
             cantidad: quantity,
             precio: Number(product.precio), // 🔹 forzado a número
             nombre: product.producto,
-            imagenUrl: product.imagenUrl?.startsWith("/")
-            ? product.imagenUrl
-            : `/${product.imagenUrl}`,
+            imagenUrl: product.imagenUrl,
             existencias: product.existencias,
         }
         );
@@ -64,9 +62,7 @@ function ProductoPage() {
             <div className="w-1/2">
             <img
                 src={
-                product.imagenUrl?.startsWith("/")
-                    ? product.imagenUrl
-                    : `/${product.imagenUrl}`
+                product.imagenUrl
                 }
                 alt={product.producto}
                 className="w-[60vh] h-auto rounded shadow"

@@ -65,9 +65,9 @@ export default function AuthButton() {
             >
                 Cerrar sesión
             </button>
-            {user.rol === 1 && (
+            {user.rolId === 1 && (
                 <NavLink
-                to="/admin"
+                to="/Admin-Panel"
                 className="block w-full text-left px-4 py-2 hover:bg-gray-100"
                 onClick={() => setIsOpen(false)}
                 >

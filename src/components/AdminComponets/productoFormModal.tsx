@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import type { Product} from "../../types/product";
+import type { Product, Categoria } from "../../types/product";
 import { useCategorias } from "../../hooks/useCategoria";
 
 type Props = {
@@ -10,7 +10,7 @@ type Props = {
     onSubmit: (data: Omit<Product, "codProducto"> | Product) => void;
 };
 
-// Extendemos el tipo para incluir el campo que controla el select
+// Extendemos el tipo para el formulario local
 interface ProductFormState extends Omit<Product, "codProducto"> {
     categoriaId: string;
 }
@@ -20,7 +20,7 @@ const initialForm: ProductFormState = {
     descripcion: "",
     precio: 0,
     existencias: 0,
-    categoriaId: "", // El select debe empezar con cadena vacía para mostrar "Seleccione..."
+    categoriaId: "", 
     categoria: { id: "", categoria: "", descripcion: "" }, 
     costo: 0,
     imagenUrl: "",
@@ -30,28 +30,19 @@ const initialForm: ProductFormState = {
 
 export default function ProductoFormModal({ open, onClose, initialData, onSubmit }: Props) {
     const [form, setForm] = useState<ProductFormState>(initialForm);
-    // Extraemos las categorías del hook
     const { categorias } = useCategorias();
 
     useEffect(() => {
-        // Cada vez que se abre el modal o cambian los datos iniciales
         if (initialData) {
-            console.log("🛠️ EDITANDO - Datos recibidos:", initialData);
-            
             const { codProducto, ...rest } = initialData;
             
-            // LÓGICA DE RECUPERACIÓN DEL ID DE CATEGORÍA
-            // 1. Buscamos en initialData.categoria.id (Objeto relacionado)
-            // 2. O buscamos en initialData.categoriaId (Llave foránea directa)
+            // Recuperación robusta del ID de categoría
             let catId = "";
-            
             if (rest.categoria && rest.categoria.id) {
                 catId = String(rest.categoria.id);
             } else if ((rest as any).categoriaId) {
                 catId = String((rest as any).categoriaId);
             }
-
-            console.log("📍 ID Categoría detectado para el select:", catId);
 
             setForm({
                 ...rest,
@@ -63,20 +54,18 @@ export default function ProductoFormModal({ open, onClose, initialData, onSubmit
                 existenciaMax: Number(rest.existenciaMax) || 0,
                 existenciaMin: Number(rest.existenciaMin) || 0,
                 imagenUrl: rest.imagenUrl ?? "",
-                categoriaId: catId, // Asignamos el ID encontrado
+                categoriaId: catId,
                 categoria: rest.categoria ?? { id: "", categoria: "", descripcion: "" },
             });
         } else {
-            console.log("✨ CREANDO - Formulario limpio");
             setForm(initialForm);
         }
-    }, [initialData, open]); // Agregamos 'open' para asegurar reinicio al abrir
+    }, [initialData, open]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setForm((prev) => ({
             ...prev,
-            // Importante: 'categoriaId' NO está aquí, por lo que se guarda como string (value)
             [name]: ["precio", "existencias", "costo", "existenciaMax", "existenciaMin"].includes(name)
                 ? parseFloat(value) || 0
                 : value,
@@ -102,17 +91,30 @@ export default function ProductoFormModal({ open, onClose, initialData, onSubmit
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        
         if (form.existenciaMin > form.existenciaMax) {
             alert("La existencia mínima no puede ser mayor que la máxima.");
             return;
         }
-        if (!form.categoriaId) {
+
+        // VALIDACIÓN CONDICIONAL:
+        // Solo obligamos a seleccionar categoría si estamos CREANDO un producto nuevo.
+        // Si estamos editando (initialData existe), permitimos enviarlo vacío.
+        if (!initialData && (!form.categoriaId || form.categoriaId === "")) {
             alert("Por favor seleccione una categoría.");
             return;
         }
         
-        // Enviamos el formulario. El backend debe saber manejar 'categoriaId' si viene en el objeto.
-        onSubmit(form as unknown as Product);
+        // Preparar payload para enviar
+        const payload: any = { ...form };
+
+        // Si es edición y el campo está vacío, lo eliminamos del objeto
+        // para que Zod (en el backend) lo ignore y mantenga el valor anterior.
+        if (initialData && (!payload.categoriaId || payload.categoriaId === "")) {
+            delete payload.categoriaId;
+        }
+
+        onSubmit(payload);
         
         if (!initialData) setForm(initialForm);
     };
@@ -156,32 +158,31 @@ export default function ProductoFormModal({ open, onClose, initialData, onSubmit
                         />
                     </div>
 
-                    {/* SELECTOR DE CATEGORÍA */}
+                    {/* SELECTOR DE CATEGORÍA (Opcional en edición) */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700">Categoría</label>
+                        <label className="block text-sm font-medium text-gray-700">
+                            Categoría {initialData && <span className="text-gray-400 font-normal text-xs">(Opcional)</span>}
+                        </label>
                         <select
                             name="categoriaId"
-                            // Usamos String() para asegurar coincidencia de tipos con las opciones
-                            value={String(form.categoriaId)} 
+                            value={String(form.categoriaId || "")} 
                             onChange={handleChange}
-                            required
+                            // Ya no usamos 'required' aquí, lo controlamos en handleSubmit
                             className="w-full border px-3 py-2 rounded-md focus:ring-2 focus:ring-orange-400 focus:outline-none bg-white"
                         >
                             <option value="">Seleccione una categoría</option>
-                            {/* Usamos 'any' en el map para evitar conflictos de tipado estricto si existen */}
                             {categorias.map((cat: any) => (
                                 <option key={cat.id} value={String(cat.id)}>
                                     {cat.categoria}
                                 </option>
                             ))}
                         </select>
-                        {/* Mensaje de ayuda si no hay categorías cargadas */}
                         {categorias.length === 0 && (
-                            <p className="text-xs text-red-500 mt-1">No se han cargado categorías. Verifique su conexión.</p>
+                            <p className="text-xs text-red-500 mt-1">No se han cargado categorías.</p>
                         )}
                     </div>
 
-                    {/* Precio y Costo (Grid) */}
+                    {/* Precio y Costo */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Precio</label>
@@ -211,7 +212,7 @@ export default function ProductoFormModal({ open, onClose, initialData, onSubmit
                         </div>
                     </div>
 
-                    {/* Existencias (Grid) */}
+                    {/* Existencias */}
                     <div className="grid grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Actual</label>

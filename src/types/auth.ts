@@ -34,5 +34,5 @@ export interface RefreshTokenResponse {
 export interface UserState {
   id: number;
   email: string;
-  rol: number;
+  rolId: number;
 }
