@@ -1,281 +1,117 @@
-import { useEffect, useState } from "react";
-import type { Product } from "../../components/listProducts";
-import { TrashIcon, EditIcon, AddIcon } from "../../components/icons";
+import { useState, useEffect } from "react";
+import { useProducts } from "../../hooks/useProduct";
+import type { Product } from "../../types/product";
+import ProductoTable from "../../components/AdminComponets/productTable";
+import ProductoFormModal from "../../components/AdminComponets/productoFormModal";
+import { AddIcon } from "../../components/icons";
 
-export default function AdminProductos() {
-    const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+export default function ProductosPage() {
+    const {
+        productos,
+        meta,
+        loading,
+        fetchProductos,
+        crearProducto,
+        actualizarProducto,
+        eliminarProducto,
+    } = useProducts();
+
     const [modalOpen, setModalOpen] = useState(false);
-    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+    const [productoEditando, setProductoEditando] = useState<Product | null>(null);
+    const [search, setSearch] = useState("");
 
     useEffect(() => {
-        fetchProductos();
-    }, []);
+        fetchProductos(1, 10, search);
+    }, [search]);
 
-    async function fetchProductos() {
-        try {
-        setLoading(true);
-        const res = await fetch("http://localhost:1234/productos");
-        const raw = await res.json();
-        const data = Array.isArray(raw) ? raw : raw.data;
-        setProducts(data);
-        setError(null);
-        } catch (err: any) {
-        setError("Error al cargar productos");
-        } finally {
-        setLoading(false);
+    const handleAgregar = () => {
+        setProductoEditando(null);
+        setModalOpen(true);
+    };
+
+    const handleEditar = (producto: Product) => {
+        setProductoEditando(producto);
+        setModalOpen(true);
+    };
+
+    const handleGuardar = async (data: Omit<Product, "codProducto"> | Product) => {
+        if (productoEditando) {
+            console.log(productoEditando.codProducto, data)
+        await actualizarProducto(productoEditando.codProducto, data);
+        } else {
+        await crearProducto(data as Omit<Product, "codProducto">);
         }
-    }
-
-    function openAddModal() {
-        setEditingProduct(null);
-        setModalOpen(true);
-    }
-
-    function openEditModal(product: Product) {
-        setEditingProduct(product);
-        setModalOpen(true);
-    }
-
-    function closeModal() {
         setModalOpen(false);
-        setEditingProduct(null);
-    }
+    };
 
-    async function handleDelete(product: Product) {
-        const confirm = window.confirm(`¿Eliminar ${product.producto}?`);
-        if (!confirm) return;
-
-        try {
-        const res = await fetch(`http://localhost:1234/productos/${product.codProducto}`, {
-            method: "DELETE",
-        });
-        if (!res.ok) throw new Error("Error al eliminar");
-        await fetchProductos();
-        } catch (err) {
-        alert("No se pudo eliminar el producto");
-        }
-    }
-
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        const form = e.currentTarget;
-        const formData = new FormData(form);
-
-        const payload: any = {
-            producto: formData.get("producto"),
-            descripcion: formData.get("descripcion"),
-            precio: parseFloat(formData.get("precio") as string),
-            costo: parseFloat(formData.get("costo") as string),
-            existencias: parseInt(formData.get("existencias") as string),
-            categoriaId: parseInt(formData.get("categoriaId") as string),
-            imagenUrl: formData.get("imagenUrl") || null,
-            existenciaMax: parseInt(formData.get("existenciaMax") as string),
-            existenciaMin: parseInt(formData.get("existenciaMin") as string),
-        };
-        const isEdit = !!editingProduct;
-
-        try {
-        const url = isEdit
-            ? `http://localhost:1234/productos/${editingProduct.codProducto}`
-            : "http://localhost:1234/productos";
-
-        if (!isEdit) {
-            payload.codProducto = formData.get("codProducto");
-        }
-
-        const res = await fetch(url, {
-            method: isEdit ? "PUT" : "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-
-        if (!res.ok) throw new Error("Error al guardar");
-
-        await fetchProductos();
-        closeModal();
-        } catch (err) {
-        alert("No se pudo guardar el producto");
-        }
-    }
+    const handlePageChange = (page: number) => {
+        fetchProductos(page, meta?.limit ?? 10, search);
+    };
 
     return (
-        <section className="p-6 bg-gray-50 min-h-screen">
-        <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Gestión de productos</h1>
+        <div className="flex-1 w-full min-w-0 flex flex-col">
+        {/* Barra fija */}
+        <div className="px-4 md:px-6 py-4 sticky top-0 bg-white z-10 flex justify-between items-center border-b border-gray-300">
+            <h1 className="text-xl font-bold text-orange-400">Gestión de Productos</h1>
             <button
-            onClick={openAddModal}
+            onClick={handleAgregar}
             className="flex gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg"
             >
             <AddIcon /> Agregar
             </button>
         </div>
 
-        {loading && <p className="text-gray-500">Cargando productos...</p>}
-        {error && <p className="text-red-500">{error}</p>}
+        {/* Buscador */}
+        <div className="mt-4 mb-6 px-4 md:px-6">
+            <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar producto..."
+            className="w-full border border-gray-300 px-4 py-2 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+            />
+        </div>
 
-        {!loading && !error && (
-            <table className="w-full table-auto border border-gray-300 shadow-sm bg-white">
-            <thead className="bg-gray-100 text-gray-700">
-                <tr>
-                <th className="px-4 py-2 text-left">Código</th>
-                <th className="px-4 py-2 text-left">Nombre</th>
-                <th className="px-4 py-2 text-left">Descripción</th>
-                <th className="px-4 py-2 text-left">Precio</th>
-                <th className="px-4 py-2 text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {products.map((product) => (
-                <tr key={product.codProducto} className="border-t border-gray-200">
-                    <td className="px-4 py-2">{product.codProducto}</td>
-                    <td className="px-4 py-2">{product.producto}</td>
-                    <td className="px-4 py-2">{product.descripcion}</td>
-                    <td className="px-4 py-2">
-                    {product.precio
-                        ? `$${parseFloat(product.precio).toFixed(2)}`
-                        : "Precio no disponible"}
-                    </td>
-                    <td className="px-4 py-2 text-center space-x-2">
-                    <button
-                        onClick={() => openEditModal(product)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md"
-                    >
-                        <EditIcon />
-                    </button>
-                    <button
-                        onClick={() => handleDelete(product)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
-                    >
-                        <TrashIcon />
-                    </button>
-                    </td>
-                </tr>
-                ))}
-            </tbody>
-            </table>
+        {/* Tabla con scroll horizontal */}
+        <div className="flex-1 overflow-hidden">
+                <ProductoTable 
+                    productos={productos}
+                    loading={loading}
+                    onEdit={handleEditar}
+                    onDelete={(p) => eliminarProducto(p.codProducto)}
+                />
+        </div>
+
+        {/* Paginación */}
+        {meta && (
+            <div className="flex justify-center items-center gap-2 mt-6 px-4 md:px-6">
+            <button
+                disabled={meta.page === 1}
+                onClick={() => handlePageChange(meta.page - 1)}
+                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+                ← 
+            </button>
+            <span>
+                Página {meta.page} de {meta.totalPages}
+            </span>
+            <button
+                disabled={!meta.hasNext}
+                onClick={() => handlePageChange(meta.page + 1)}
+                className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+            >
+                →
+            </button>
+            </div>
         )}
 
-        {modalOpen && (
-            <div
-            className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-50"
-            onClick={closeModal}
-            >
-                <div
-                className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
-                onClick={(e) => e.stopPropagation()} // ⬅️ Evita que el clic dentro cierre el modal
-                >
-                <h2 className="text-xl font-bold mb-4">
-                    {editingProduct ? "Editar producto" : "Agregar producto"}
-                </h2>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {!editingProduct && (
-                        <input
-                        name="codProducto"
-                        placeholder="Código"
-                        required
-                        className="w-full border px-3 py-2 rounded"
-                        />
-                    )}
-                    <input
-                        name="producto"
-                        defaultValue={editingProduct?.producto || ""}
-                        placeholder="Nombre"
-                        required
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                    <textarea
-                        name="descripcion"
-                        defaultValue={editingProduct?.descripcion || ""}
-                        placeholder="Descripción"
-                        required
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                    <input
-                        name="precio"
-                        defaultValue={editingProduct?.precio || ""}
-                        placeholder="Precio"
-                        required
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                    <input
-                        name="costo"
-                        defaultValue={editingProduct?.costo || ""}
-                        placeholder="Costo"
-                        required
-                        type="number"
-                        step="0.01"
-                        min="1"
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                    <input
-                        name="existencias"
-                        defaultValue={editingProduct?.existencias || ""}
-                        placeholder="Existencias"
-                        required
-                        type="number"
-                        min="0"
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                    <input
-                        name="categoriaId"
-                        defaultValue={editingProduct?.categoriaId || ""}
-                        placeholder="ID de categoría"
-                        required
-                        type="number"
-                        min="1"
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                    <input
-                        name="imagenUrl"
-                        defaultValue={editingProduct?.imagenUrl || ""}
-                        placeholder="URL de imagen (opcional)"
-                        type="text"
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                    <input
-                        name="existenciaMax"
-                        defaultValue={editingProduct?.existenciaMax ?? 0}
-                        placeholder="Existencia máxima"
-                        type="number"
-                        min="0"
-                        className="w-full border px-3 py-2 rounded"
-                    />
-                    <input
-                        name="existenciaMin"
-                        defaultValue={editingProduct?.existenciaMin ?? 0}
-                        placeholder="Existencia mínima"
-                        type="number"
-                        min="0"
-                        className="w-full border px-3 py-2 rounded"
-                    />
-
-                    <div className="flex justify-end gap-2">
-                        <button
-                        type="button"
-                        onClick={closeModal}
-                        className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                        >
-                        Cancelar
-                        </button>
-                        <button
-                        type="submit"
-                        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                        >
-                        Guardar
-                        </button>
-                    </div>
-                    </form>
-
-                </div>
-            </div>
-            )}
-
-        </section>
+        {/* Modal */}
+        <ProductoFormModal
+            open={modalOpen}
+            onClose={() => setModalOpen(false)}
+            initialData={productoEditando}
+            onSubmit={handleGuardar}
+        />
+        </div>
     );
 }

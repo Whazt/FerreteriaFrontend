@@ -1,48 +1,53 @@
 import { useState } from "react";
-import { useClientes } from "../../hooks/useCliente";
-import ClienteTable from "../../components/AdminComponets/clienteTable";
-import ClienteFormModal from "../../components/AdminComponets/clienteFormModal";
+import { useCategorias } from "../../hooks/useCategoria";
+import CategoriaTable from "../../components/AdminComponets/categoriaTable";
+import CategoriaFormModal from "../../components/AdminComponets/categoriaModal";
 import { AddIcon } from "../../components/icons";
-import type { Cliente, ClienteFormData } from "../../types/cliente";
+import type { Categoria, CategoriaFormData } from "../../types/categoria";
 
-export default function ClientesPage() {
+export default function CategoriasPage() {
     const {
-        clientes,
+        categorias,
         loading,
         error,
         search,
         setSearch,
-        crearCliente,
-        actualizarCliente,
-        eliminarCliente
-    } = useClientes();
+        crearCategoria,
+        actualizarCategoria,
+        eliminarCategoria
+    } = useCategorias();
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [registroEditando, setRegistroEditando] = useState<Cliente | null>(null);
+    const [registroEditando, setRegistroEditando] = useState<Categoria | null>(null);
 
+    // Abrir modal para crear
     const handleAgregar = () => {
         setRegistroEditando(null);
         setModalOpen(true);
     };
 
-    const handleEditar = (item: Cliente) => {
+    // Abrir modal para editar
+    const handleEditar = (item: Categoria) => {
         setRegistroEditando(item);
         setModalOpen(true);
     };
 
-    const handleGuardar = async (data: ClienteFormData) => {
+    // Guardar (Crear o Actualizar)
+    const handleGuardar = async (data: CategoriaFormData) => {
         if (registroEditando) {
-            await actualizarCliente(registroEditando.id, data);
+            await actualizarCategoria(registroEditando.id, data);
         } else {
-            await crearCliente(data);
+            await crearCategoria(data);
         }
+        // El modal se cierra automáticamente tras el éxito en su propia lógica interna,
+        // o podemos forzar el cierre aquí si quisiéramos ser explícitos.
     };
 
     return (
         <div className="flex flex-col h-full w-full bg-gray-50 overflow-hidden">
             {/* Header Fijo */}
             <div className="flex-none px-4 md:px-6 py-4 bg-white border-b border-gray-200 flex justify-between items-center z-10 shadow-sm">
-                <h1 className="text-xl md:text-2xl font-bold text-gray-800">Gestión de Clientes</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-800">Categorías</h1>
                 <button
                     onClick={handleAgregar}
                     className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm active:scale-95 transform"
@@ -51,12 +56,12 @@ export default function ClientesPage() {
                 </button>
             </div>
 
-            {/* Buscador */}
+            {/* Barra de Búsqueda */}
             <div className="flex-none px-4 md:px-6 mt-4 mb-4">
                 <div className="relative">
                     <input
                         type="text"
-                        placeholder="Buscar por nombre, apellido o teléfono..."
+                        placeholder="Buscar categoría..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full md:max-w-md border border-gray-300 rounded-lg pl-4 pr-10 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm transition-all"
@@ -69,24 +74,24 @@ export default function ClientesPage() {
                 </div>
             </div>
 
-            {/* Área de Contenido */}
+            {/* Área de Contenido con Scroll */}
             <div className="flex-1 overflow-auto px-4 md:px-6 pb-6">
                 {error && (
-                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-sm">
+                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg shadow-sm animate-fade-in">
                         <strong className="font-bold">Error: </strong> {error}
                     </div>
                 )}
 
-                <ClienteTable
-                    clientes={clientes}
+                <CategoriaTable
+                    categorias={categorias}
                     loading={loading}
                     onEdit={handleEditar}
-                    onDelete={eliminarCliente}
+                    onDelete={eliminarCategoria}
                 />
             </div>
 
-            {/* Modal */}
-            <ClienteFormModal
+            {/* Modal de Formulario */}
+            <CategoriaFormModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
                 initialData={registroEditando}

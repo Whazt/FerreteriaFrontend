@@ -8,7 +8,7 @@ interface Props {
     token?: string;
 }
 
-export function CartSidebar({ visible, onClose, token }: Props) {
+export function CartSidebar({ visible, onClose }: Props) {
     const { items, total, clearCart } = useCartStore();
 
     return (
@@ -37,7 +37,6 @@ export function CartSidebar({ visible, onClose, token }: Props) {
                     <CartItemCard
                     key={item.productoId}
                     productoId={item.productoId}
-                    token={token}
                     />
                 ))
                 )}
@@ -52,7 +51,7 @@ export function CartSidebar({ visible, onClose, token }: Props) {
                 <div className="flex gap-2">
                 <button
                     className="flex-1 bg-gray-200 px-2 py-2 rounded hover:bg-gray-300"
-                    onClick={() => clearCart(token)}
+                    onClick={() => clearCart()}
                 >
                     Limpiar
                 </button>

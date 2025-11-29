@@ -1,53 +1,38 @@
 import { useState } from "react";
-import { useClientes } from "../../hooks/useCliente";
-import ClienteTable from "../../components/AdminComponets/clienteTable";
-import ClienteFormModal from "../../components/AdminComponets/clienteFormModal";
+import { useAjustes } from "../../hooks/useAjuste";
+import AjusteTable from "../../components/AdminComponets/ajusteTable";
+import AjusteFormModal from "../../components/AdminComponets/ajusteFormModal";
 import { AddIcon } from "../../components/icons";
-import type { Cliente, ClienteFormData } from "../../types/cliente";
+import type { AjusteCreatePayload } from "../../types/ajuste";
 
-export default function ClientesPage() {
+export default function AjustesPage() {
     const {
-        clientes,
+        ajustes,
         loading,
         error,
         search,
         setSearch,
-        crearCliente,
-        actualizarCliente,
-        eliminarCliente
-    } = useClientes();
+        crearAjuste,
+        eliminarAjuste
+    } = useAjustes();
 
     const [modalOpen, setModalOpen] = useState(false);
-    const [registroEditando, setRegistroEditando] = useState<Cliente | null>(null);
 
-    const handleAgregar = () => {
-        setRegistroEditando(null);
-        setModalOpen(true);
-    };
-
-    const handleEditar = (item: Cliente) => {
-        setRegistroEditando(item);
-        setModalOpen(true);
-    };
-
-    const handleGuardar = async (data: ClienteFormData) => {
-        if (registroEditando) {
-            await actualizarCliente(registroEditando.id, data);
-        } else {
-            await crearCliente(data);
-        }
+    const handleCreate = async (data: AjusteCreatePayload) => {
+        await crearAjuste(data);
+        // El modal se cierra automáticamente tras el éxito dentro del componente
     };
 
     return (
         <div className="flex flex-col h-full w-full bg-gray-50 overflow-hidden">
             {/* Header Fijo */}
             <div className="flex-none px-4 md:px-6 py-4 bg-white border-b border-gray-200 flex justify-between items-center z-10 shadow-sm">
-                <h1 className="text-xl md:text-2xl font-bold text-gray-800">Gestión de Clientes</h1>
+                <h1 className="text-xl md:text-2xl font-bold text-gray-800">Ajustes de Inventario</h1>
                 <button
-                    onClick={handleAgregar}
+                    onClick={() => setModalOpen(true)}
                     className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm active:scale-95 transform"
                 >
-                    <AddIcon /> <span className="hidden sm:inline">Agregar</span>
+                    <AddIcon /> <span className="hidden sm:inline">Nuevo Ajuste</span>
                 </button>
             </div>
 
@@ -56,7 +41,7 @@ export default function ClientesPage() {
                 <div className="relative">
                     <input
                         type="text"
-                        placeholder="Buscar por nombre, apellido o teléfono..."
+                        placeholder="Buscar por producto, motivo u observación..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full md:max-w-md border border-gray-300 rounded-lg pl-4 pr-10 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm transition-all"
@@ -77,20 +62,18 @@ export default function ClientesPage() {
                     </div>
                 )}
 
-                <ClienteTable
-                    clientes={clientes}
+                <AjusteTable
+                    ajustes={ajustes}
                     loading={loading}
-                    onEdit={handleEditar}
-                    onDelete={eliminarCliente}
+                    onDelete={eliminarAjuste}
                 />
             </div>
 
             {/* Modal */}
-            <ClienteFormModal
+            <AjusteFormModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}
-                initialData={registroEditando}
-                onSubmit={handleGuardar}
+                onSubmit={handleCreate}
             />
         </div>
     );

@@ -36,14 +36,20 @@ export const productService = {
         if (!res.ok) throw new Error("Error al obtener catálogo de productos");
         const json = await res.json();
         return {
-            data: (json.data ?? []).map((p: any) => ({
-            codProducto: p.codProducto,
-            producto: p.producto,
-            descripcion: p.descripcion,
-            precio: parseFloat(p.precio),
-            existencias: p.existencias,
-            imagenUrl: p.imagenUrl ?? null,
-            categoria: p.categoria ?? null,
+        data: (json.data ?? []).map((p: any) => ({
+                codProducto: p.codProducto,
+                producto: p.producto,
+                descripcion: p.descripcion,
+                precio: p.precio !== undefined && p.precio !== null ? parseFloat(p.precio) : 0,
+                existencias: p.existencias !== undefined && p.existencias !== null ? parseFloat(p.existencias) : 0,
+                costo: p.costo !== undefined && p.costo !== null ? parseFloat(p.costo) : 0,
+                existenciaMax: p.existenciaMax !== undefined && p.existenciaMax !== null ? parseFloat(p.existenciaMax) : 0,
+                existenciaMin: p.existenciaMin !== undefined && p.existenciaMin !== null ? parseFloat(p.existenciaMin) : 0,
+                imagenUrl: p.imagenUrl ?? "",
+                categoria: p.categoria ?? { id: "", categoria: "", descripcion: "" },
+                createdAt: p.createdAt ?? null,
+                updatedAt: p.updatedAt ?? null,
+                deletedAt: p.deletedAt ?? null,
             })),
             meta: json.meta,
             mensaje: json.mensaje,

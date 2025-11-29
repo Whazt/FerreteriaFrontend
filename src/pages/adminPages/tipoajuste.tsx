@@ -1,188 +1,99 @@
-import { useEffect, useState } from "react";
-import { TrashIcon, EditIcon, AddIcon } from "../../components/icons";
+import { useState } from "react";
+import { useTipoAjuste } from "../../hooks/useTipoAjustes";
+import TipoAjusteTable from "../../components/AdminComponets/tipoAjusteTable";
+import TipoAjusteFormModal from "../../components/AdminComponets/tipoAjusteFormModal";
+import { AddIcon } from "../../components/icons";
+import type { TipoAjuste, TipoAjusteFormData } from "../../types/tipoAjuste";
 
-interface TipoAjuste {
-    id: number;
-    tipoAjuste: string;
-}
+export default function TipoAjustePage() {
+    const {
+        tipos,
+        loading,
+        error,
+        search,
+        setSearch,
+        crearTipo,
+        actualizarTipo,
+        eliminarTipo
+    } = useTipoAjuste();
 
-export default function AdminTipoAjuste() {
-    const [ajustes, setAjustes] = useState<TipoAjuste[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
-    const [editingAjuste, setEditingAjuste] = useState<TipoAjuste | null>(null);
+    const [registroEditando, setRegistroEditando] = useState<TipoAjuste | null>(null);
 
-    useEffect(() => {
-        fetchAjustes();
-    }, []);
-
-    async function fetchAjustes() {
-        try {
-        setLoading(true);
-        const res = await fetch("http://localhost:1234/tipoajustes");
-        const raw = await res.json();
-        const data = Array.isArray(raw) ? raw : raw.data;
-        setAjustes(data);
-        setError(null);
-        } catch (err: any) {
-        setError("Error al cargar tipos de ajuste");
-        } finally {
-        setLoading(false);
-        }
-    }
-
-    function openAddModal() {
-        setEditingAjuste(null);
+    const handleAgregar = () => {
+        setRegistroEditando(null);
         setModalOpen(true);
-    }
+    };
 
-    function openEditModal(ajuste: TipoAjuste) {
-        setEditingAjuste(ajuste);
+    const handleEditar = (item: TipoAjuste) => {
+        setRegistroEditando(item);
         setModalOpen(true);
-    }
+    };
 
-    function closeModal() {
-        setModalOpen(false);
-        setEditingAjuste(null);
-    }
-
-    async function handleDelete(ajuste: TipoAjuste) {
-        const confirm = window.confirm(`¿Eliminar tipo de ajuste "${ajuste.tipoAjuste}"?`);
-        if (!confirm) return;
-
-        try {
-        const res = await fetch(`http://localhost:1234/tipoajustes/${ajuste.id}`, {
-            method: "DELETE",
-        });
-        if (!res.ok) throw new Error("Error al eliminar");
-        await fetchAjustes();
-        } catch (err) {
-        alert("No se pudo eliminar el tipo de ajuste");
+    const handleGuardar = async (data: TipoAjusteFormData) => {
+        if (registroEditando) {
+            await actualizarTipo(registroEditando.id, data);
+        } else {
+            await crearTipo(data);
         }
-    }
-
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        const form = e.currentTarget;
-        const formData = new FormData(form);
-
-        const payload = {
-        tipoAjuste: formData.get("tipoAjuste"),
-        };
-
-        const isEdit = !!editingAjuste;
-
-        try {
-        const url = isEdit
-            ? `http://localhost:1234/tipoajustes/${editingAjuste.id}`
-            : "http://localhost:1234/tipoajustes";
-
-        const res = await fetch(url, {
-            method: isEdit ? "PUT" : "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-        });
-
-        if (!res.ok) throw new Error("Error al guardar tipo de ajuste");
-
-        await fetchAjustes();
-        closeModal();
-        } catch (err) {
-        alert("No se pudo guardar el tipo de ajuste");
-        }
-    }
+        // El modal se cierra tras la confirmación exitosa en el onSubmit del componente modal
+        // o podemos forzarlo a false aquí si queremos.
+    };
 
     return (
-        <section className="p-6 bg-gray-50 min-h-screen">
-        <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-gray-800">Gestión de Tipos de Ajuste</h1>
-            <button
-            onClick={openAddModal}
-            className="flex gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg"
-            >
-            <AddIcon /> Agregar
-            </button>
-        </div>
+        <div className="flex flex-col h-full w-full bg-gray-50 overflow-hidden">
+            {/* Header Fijo */}
+            <div className="flex-none px-4 md:px-6 py-4 bg-white border-b border-gray-200 flex justify-between items-center z-10">
+                <h1 className="text-xl md:text-2xl font-bold text-gray-800">Tipos de Ajuste</h1>
+                <button
+                    onClick={handleAgregar}
+                    className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded-lg transition-colors shadow-sm"
+                >
+                    <AddIcon /> <span className="hidden sm:inline">Agregar</span>
+                </button>
+            </div>
 
-        {loading && <p className="text-gray-500">Cargando tipos de ajuste...</p>}
-        {error && <p className="text-red-500">{error}</p>}
-
-        {!loading && !error && (
-            <table className="w-full table-auto border border-gray-300 shadow-sm bg-white">
-            <thead className="bg-gray-100 text-gray-700">
-                <tr>
-                <th className="px-4 py-2 text-left">ID</th>
-                <th className="px-4 py-2 text-left">Tipo de Ajuste</th>
-                <th className="px-4 py-2 text-center">Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                {ajustes.map((ajuste) => (
-                <tr key={ajuste.id} className="border-t border-gray-200">
-                    <td className="px-4 py-2">{ajuste.id}</td>
-                    <td className="px-4 py-2">{ajuste.tipoAjuste}</td>
-                    <td className="px-4 py-2 text-center space-x-2">
-                    <button
-                        onClick={() => openEditModal(ajuste)}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded-md"
-                    >
-                        <EditIcon />
-                    </button>
-                    <button
-                        onClick={() => handleDelete(ajuste)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
-                    >
-                        <TrashIcon />
-                    </button>
-                    </td>
-                </tr>
-                ))}
-            </tbody>
-            </table>
-        )}
-
-        {modalOpen && (
-            <div
-            className="absolute top-0 left-0 w-full h-full flex items-center justify-center z-50"
-            onClick={closeModal}
-            >
-            <div
-                className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md"
-                onClick={(e) => e.stopPropagation()}
-            >
-                <h2 className="text-xl font-bold mb-4">
-                {editingAjuste ? "Editar Tipo de Ajuste" : "Agregar Tipo de Ajuste"}
-                </h2>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                <input
-                    name="tipoAjuste"
-                    defaultValue={editingAjuste?.tipoAjuste || ""}
-                    placeholder="Nombre del tipo de ajuste"
-                    required
-                    className="w-full border px-3 py-2 rounded"
-                />
-
-                <div className="flex justify-end gap-2">
-                    <button
-                    type="button"
-                    onClick={closeModal}
-                    className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
-                    >
-                    Cancelar
-                    </button>
-                    <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                    Guardar
-                    </button>
+            {/* Buscador */}
+            <div className="flex-none px-4 md:px-6 mt-4 mb-4">
+                <div className="relative">
+                    <input
+                        type="text"
+                        placeholder="Buscar tipo de ajuste..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="w-full md:max-w-md border border-gray-300 rounded-lg pl-4 pr-10 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none shadow-sm"
+                    />
+                    <div className="absolute inset-y-0 right-0 pr-3 md:right-auto md:left-104 flex items-center pointer-events-none">
+                        <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
                 </div>
-                </form>
             </div>
+
+            {/* Área de Contenido con Scroll */}
+            <div className="flex-1 overflow-auto px-4 md:px-6 pb-6">
+                {error && (
+                    <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                        {error}
+                    </div>
+                )}
+
+                <TipoAjusteTable
+                    tipos={tipos}
+                    loading={loading}
+                    onEdit={handleEditar}
+                    onDelete={eliminarTipo}
+                />
             </div>
-        )}
-        </section>
+
+            {/* Modal */}
+            <TipoAjusteFormModal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                initialData={registroEditando}
+                onSubmit={handleGuardar}
+            />
+        </div>
     );
 }
